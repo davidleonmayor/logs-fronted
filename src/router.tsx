@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 // import AuthLayout from "./layouts/Auth";
-import AppLayout from "./layouts/AppLayout";
+// import AppLayout from "./layouts/AppLayout";
+import { MainNavbar } from "./layouts/MainNavbar";
 import { NewProduct } from "./views/NewProduct";
 // import LinkTree from "./views/LinkTree";
 // import Profile from "./views/Profile";
@@ -21,13 +22,13 @@ export default function Router() {
         </Route> */}
 
         {/* View config user profile */}
-        <Route path="/clients" element={<AppLayout />} />
+        <Route path="/" element={<div>home layout</div>} />
+        <Route path="/clients" element={<MainNavbar />} />
 
         {/* Rutas con el layout fijo */}
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<></>} />
-          <Route path="/inventario/productos/nuevo" element={<NewProduct />} />
-          <Route path="/inventario/test" element={<NewProduct />} />
+        <Route element={<MainNavbar />}>
+          <Route path="/inventory/new-product" element={<NewProduct />} />
+          <Route path="/inventory/test" element={<NewProduct />} />
         </Route>
 
         {/* <Route path="/admin" element={<AppLayout />}>
