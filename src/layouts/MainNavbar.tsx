@@ -1,25 +1,42 @@
+import * as React from "react";
 import { Link, Outlet } from "react-router-dom";
 import {
   LayoutGrid,
   ShoppingCart,
   Receipt,
-  CreditCard,
-  // BarChart3,
-  // Users,
-  // Building2,
-  // Settings,
-  Sun,
+  // CreditCard,
+  // Sun,
   ShoppingBag,
   Home,
+  Plus,
+  Minus,
+  // X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
+interface CartItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
 export function MainNavbar({ className }: SidebarProps) {
+  const [cartItems, setCartItems] = React.useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = React.useState(false);
+
   const menuItems = [
     {
       title: "Home",
@@ -49,14 +66,41 @@ export function MainNavbar({ className }: SidebarProps) {
           icon: Receipt,
           to: "/sales",
         },
-        // {
-        //   title: "Mis gastos",
-        //   icon: CreditCard,
-        //   to: "/expenses",
-        // },
       ],
     },
   ];
+
+  const addToCart = (item: CartItem) => {
+    setCartItems((prevItems) => {
+      const existingItem = prevItems.find((i) => i.id === item.id);
+      if (existingItem) {
+        return prevItems.map((i) =>
+          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      }
+      return [...prevItems, { ...item, quantity: 1 }];
+    });
+  };
+
+  const removeFromCart = (id: number) => {
+    setCartItems((prevItems) =>
+      prevItems.reduce((acc, item) => {
+        if (item.id === id) {
+          if (item.quantity > 1) {
+            acc.push({ ...item, quantity: item.quantity - 1 });
+          }
+        } else {
+          acc.push(item);
+        }
+        return acc;
+      }, [] as CartItem[])
+    );
+  };
+
+  const cartTotal = cartItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
 
   return (
     <div className="flex h-screen">
@@ -156,14 +200,73 @@ export function MainNavbar({ className }: SidebarProps) {
             <h1 className="font-semibold">Dashboard</h1>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="outline" size="icon">
-              <div className="relative">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-                  0
-                </span>
-              </div>
-            </Button>
+            <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <div className="relative">
+                    <ShoppingCart className="h-5 w-5" />
+                    <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                      {cartItems.reduce(
+                        (total, item) => total + item.quantity,
+                        0
+                      )}
+                    </span>
+                  </div>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right">
+                <SheetHeader>
+                  <SheetTitle>Carrito de Compras</SheetTitle>
+                </SheetHeader>
+                <ScrollArea className="h-[calc(100vh-8rem)] pr-4">
+                  {cartItems.length === 0 ? (
+                    <p className="text-center text-gray-500 mt-4">
+                      Tu carrito está vacío
+                    </p>
+                  ) : (
+                    cartItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between py-4 border-b"
+                      >
+                        <div>
+                          <h3 className="font-medium">{item.name}</h3>
+                          <p className="text-sm text-gray-500">
+                            S/ {item.price.toFixed(2)} x {item.quantity}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => removeFromCart(item.id)}
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <span>{item.quantity}</span>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => addToCart(item)}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </ScrollArea>
+                <div className="mt-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="font-medium">Total:</span>
+                    <span className="font-bold">S/ {cartTotal.toFixed(2)}</span>
+                  </div>
+                  <Button className="w-full" disabled={cartItems.length === 0}>
+                    Proceder al pago
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto p-6">
