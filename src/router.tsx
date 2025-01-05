@@ -9,6 +9,7 @@ import { NewProduct } from "./views/NewProduct";
 // import Register from "./views/Register";
 // import Handle from "./views/Handle";
 import { NotFound } from "./views/NotFound";
+import { ProductCatalog } from "./views/ProductCatalog";
 // import Home from "./views/Home";
 
 export default function Router() {
@@ -28,6 +29,7 @@ export default function Router() {
         {/* Rutas con el layout fijo */}
         <Route element={<MainNavbar />}>
           <Route path="/inventory/new-product" element={<NewProduct />} />
+          <Route path="/inventory/products" element={<ProductCatalog />} />
           <Route path="/inventory/test" element={<NewProduct />} />
         </Route>
 
